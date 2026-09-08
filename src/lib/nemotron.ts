@@ -16,6 +16,22 @@ interface NemotronOptions {
   temperature?: number;
   maxTokens?: number;
   reasoning?: boolean;
+  timeoutMs?: number;
+}
+
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 interface NemotronResponse {
@@ -52,6 +68,7 @@ export async function callNemotron(
     temperature = 0.3,
     maxTokens = 4096,
     reasoning = false,
+    timeoutMs = 30000,
   } = options;
 
   const { url, key, model, provider } = getProvider();
@@ -86,11 +103,11 @@ export async function callNemotron(
 
   // Try primary provider
   try {
-    const response = await fetch(url, {
+    const response = await fetchWithTimeout(url, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
-    });
+    }, timeoutMs);
 
     if (!response.ok) {
       const errText = await response.text();
@@ -157,11 +174,11 @@ export async function callNemotron(
     };
 
     try {
-      const fbResponse = await fetch(fbUrl, {
+      const fbResponse = await fetchWithTimeout(fbUrl, {
         method: "POST",
         headers: fbHeaders,
         body: JSON.stringify(fbBody),
-      });
+      }, timeoutMs);
 
       if (!fbResponse.ok) throw new Error(`Fallback ${fbProvider} also failed`);
 
@@ -244,6 +261,7 @@ Provide: 1) Confirm/refine classification 2) IP protection strategy 3) Regulator
 
 export async function translateText(
   text: string,
+  sourceLanguage: string,
   targetLanguage: string
 ): Promise<NemotronResponse> {
   const langMap: Record<string, string> = {
@@ -253,7 +271,7 @@ export async function translateText(
   return callNemotron([
     {
       role: "system",
-      content: `Translate into ${langMap[targetLanguage] || targetLanguage}. Keep statute references in English. Maintain formatting.`,
+      content: `Translate from ${langMap[sourceLanguage] || sourceLanguage} into ${langMap[targetLanguage] || targetLanguage}. Keep statute references in English. Maintain formatting and meaning. Return only the translated text.`,
     },
     { role: "user", content: text },
   ], { temperature: 0.1, maxTokens: 3000 });

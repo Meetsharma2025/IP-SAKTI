@@ -199,7 +199,7 @@ ${confidence.overall < 50 ? (language === "hi" ? "⚠️ साक्ष्य �
   try {
     const response = await callNemotron(
       [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-      { temperature: 0.2, maxTokens: 3000, reasoning: true }
+      { temperature: 0.2, maxTokens: 3000, reasoning: true, timeoutMs: 20000 }
     );
 
     answer = response.content;

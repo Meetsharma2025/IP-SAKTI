@@ -5,7 +5,7 @@ import { conversations, messages, auditLog } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export const runtime = "nodejs";
-export const maxDuration = 120;
+export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   try {

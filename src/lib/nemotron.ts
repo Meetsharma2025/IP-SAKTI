@@ -16,6 +16,7 @@ interface NemotronOptions {
   temperature?: number;
   maxTokens?: number;
   reasoning?: boolean;
+  timeoutMs?: number;
 }
 
 interface NemotronResponse {
@@ -44,6 +45,21 @@ function getProvider(): { url: string; key: string; model: string; provider: "nv
   throw new Error("Neither NVIDIA_API_KEY nor OPENROUTER_API_KEY is set");
 }
 
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export async function callNemotron(
   messages: NemotronMessage[],
   options: NemotronOptions = {}
@@ -52,6 +68,7 @@ export async function callNemotron(
     temperature = 0.3,
     maxTokens = 4096,
     reasoning = false,
+    timeoutMs = 30000,
   } = options;
 
   const { url, key, model, provider } = getProvider();
@@ -86,11 +103,11 @@ export async function callNemotron(
 
   // Try primary provider
   try {
-    const response = await fetch(url, {
+    const response = await fetchWithTimeout(url, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
-    });
+    }, timeoutMs);
 
     if (!response.ok) {
       const errText = await response.text();
@@ -157,11 +174,11 @@ export async function callNemotron(
     };
 
     try {
-      const fbResponse = await fetch(fbUrl, {
+      const fbResponse = await fetchWithTimeout(fbUrl, {
         method: "POST",
         headers: fbHeaders,
         body: JSON.stringify(fbBody),
-      });
+      }, timeoutMs);
 
       if (!fbResponse.ok) throw new Error(`Fallback ${fbProvider} also failed`);
 

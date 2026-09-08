@@ -138,7 +138,9 @@ ${confidence.overall < 50 ? "⚠️ Evidence confidence is LOW. Acknowledge limi
   try {
     const response = await callNemotron(
       [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-      { temperature: 0.2, maxTokens: 3000, reasoning: true }
+      // Chat must respond within the serverless budget. Source retrieval keeps
+      // answers grounded, so long hidden reasoning is unnecessary here.
+      { temperature: 0.2, maxTokens: 1000, reasoning: false }
     );
 
     answer = response.content;

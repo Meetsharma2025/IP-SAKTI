@@ -6,6 +6,9 @@ const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const MODEL_NVIDIA = "nvidia/nemotron-3-ultra-550b-a55b";
 const MODEL_OPENROUTER = "nvidia/nemotron-3-ultra-550b-a55b:free";
+// Keep each upstream attempt within the Vercel function budget. Callers can
+// still return their source-backed fallback if both providers are unavailable.
+const PROVIDER_TIMEOUT_MS = 20_000;
 
 interface NemotronMessage {
   role: "system" | "user" | "assistant";
@@ -90,6 +93,7 @@ export async function callNemotron(
       method: "POST",
       headers,
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -161,6 +165,7 @@ export async function callNemotron(
         method: "POST",
         headers: fbHeaders,
         body: JSON.stringify(fbBody),
+        signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
       });
 
       if (!fbResponse.ok) throw new Error(`Fallback ${fbProvider} also failed`);

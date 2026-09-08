@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@theme {
+  --color-saffron-50: #fef7ed;
+  --color-saffron-100: #fdecd4;
+  --color-saffron-200: #fad5a8;
+  --color-saffron-300: #f6b871;
+  --color-saffron-400: #f19338;
+  --color-saffron-500: #ee7a14;
+  --color-saffron-600: #df600a;
+  --color-saffron-700: #b9470b;
+  --color-saffron-800: #933810;
+  --color-saffron-900: #773010;
+  --color-saffron-950: #401606;
+
+  --color-ayurveda-50: #f0fdf0;
+  --color-ayurveda-100: #dcfcdc;
+  --color-ayurveda-200: #bbf7bb;
+  --color-ayurveda-300: #86ef86;
+  --color-ayurveda-400: #4ade4a;
+  --color-ayurveda-500: #22c522;
+  --color-ayurveda-600: #16a316;
+  --color-ayurveda-700: #158015;
+  --color-ayurveda-800: #166516;
+  --color-ayurveda-900: #145314;
+  --color-ayurveda-950: #052e05;
+
+  --color-earth-50: #faf8f1;
+  --color-earth-100: #f0eadb;
+  --color-earth-200: #e2d4b5;
+  --color-earth-300: #d0b888;
+  --color-earth-400: #c19e63;
+  --color-earth-500: #b68a49;
+  --color-earth-600: #9c6f3b;
+  --color-earth-700: #815632;
+  --color-earth-800: #6b472e;
+  --color-earth-900: #5a3c29;
+  --color-earth-950: #331f14;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(238, 122, 20, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(238, 122, 20, 0.5); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c19e63;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9c6f3b;
+}
+
+/* Markdown-like styling for responses */
+.prose-response strong {
+  color: #b9470b;
+  font-weight: 600;
+}
+
+.prose-response em {
+  color: #6b472e;
+  font-style: italic;
+}

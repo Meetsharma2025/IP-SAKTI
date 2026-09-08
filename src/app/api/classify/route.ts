@@ -10,7 +10,7 @@ export const maxDuration = 60;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { answers, productName, productDescription, sessionId } = body;
+    const { answers, productName, productDescription, sessionId, language = "en" } = body;
 
     if (!answers || typeof answers !== "object") {
       return NextResponse.json({ error: "Answers are required" }, { status: 400 });
@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
         productName || "Unnamed product",
         productDescription || "No description provided",
         JSON.stringify(result),
-        JSON.stringify(answers)
+        JSON.stringify(answers),
+        language
       );
       aiAnalysis = nemotronResult.content;
       aiReasoning = nemotronResult.reasoning || undefined;

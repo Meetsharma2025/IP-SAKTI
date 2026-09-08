@@ -1,59 +1,62 @@
-import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
+import { drizzle as drizzleNeon } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+import { drizzle as drizzlePg, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
-// Lazy initialization — pool and db created on first use, not at import time.
-// This prevents build-time crashes on Vercel when DATABASE_URL isn't available
-// during static page generation.
+// Smart database connection:
+// - Vercel/serverless: uses @neondatabase/serverless (HTTP, no persistent connection)
+// - Local dev: uses pg Pool (persistent TCP connection)
+// Both are lazy-initialized — no crash at build time.
 
 const globalForDb = globalThis as typeof globalThis & {
-  __ipSaktiPool?: Pool;
   __ipSaktiDb?: NodePgDatabase;
+  __ipSaktiPool?: Pool;
 };
 
-function createPool(): Pool {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    throw new Error(
-      "DATABASE_URL environment variable is required. " +
-        "Set it in your Vercel project settings or .env file."
-    );
-  }
-
-  const isLocalhost =
-    databaseUrl.includes("localhost") || databaseUrl.includes("127.0.0.1");
-
-  return new Pool({
-    connectionString: databaseUrl,
-    ssl: isLocalhost ? false : { rejectUnauthorized: false },
-    max: 10,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
-  });
+function isServerless(): boolean {
+  return !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 }
 
-function getPool(): Pool {
-  if (!globalForDb.__ipSaktiPool) {
-    globalForDb.__ipSaktiPool = createPool();
-  }
-  return globalForDb.__ipSaktiPool;
+function isLocalhost(url: string): boolean {
+  return url.includes("localhost") || url.includes("127.0.0.1");
 }
 
 function getDb(): NodePgDatabase {
-  if (!globalForDb.__ipSaktiDb) {
-    globalForDb.__ipSaktiDb = drizzle(getPool());
+  if (globalForDb.__ipSaktiDb) return globalForDb.__ipSaktiDb;
+
+  const url = process.env.DATABASE_URL;
+  if (!url) {
+    throw new Error(
+      "DATABASE_URL environment variable is required. " +
+      "Set it in Vercel project settings or .env file."
+    );
   }
-  return globalForDb.__ipSaktiDb;
+
+  let instance: NodePgDatabase;
+
+  if (isServerless() && !isLocalhost(url)) {
+    // Vercel serverless — use Neon HTTP driver (no TCP connection needed)
+    const client = neon(url);
+    instance = drizzleNeon(client) as unknown as NodePgDatabase;
+  } else {
+    // Local dev or non-serverless — use pg Pool
+    if (!globalForDb.__ipSaktiPool) {
+      globalForDb.__ipSaktiPool = new Pool({
+        connectionString: url,
+        ssl: isLocalhost(url) ? false : { rejectUnauthorized: false },
+        max: 10,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 10000,
+      });
+    }
+    instance = drizzlePg(globalForDb.__ipSaktiPool);
+  }
+
+  globalForDb.__ipSaktiDb = instance;
+  return instance;
 }
 
-// Lazy proxies — accessing any property triggers creation
-export const pool: Pool = new Proxy({} as Pool, {
-  get(_, prop: string | symbol) {
-    const p = getPool();
-    const val = (p as unknown as Record<string | symbol, unknown>)[prop];
-    return typeof val === "function" ? val.bind(p) : val;
-  },
-});
-
+// Lazy proxy — db is only created when actually accessed at runtime
 export const db: NodePgDatabase = new Proxy({} as NodePgDatabase, {
   get(_, prop: string | symbol) {
     const d = getDb();

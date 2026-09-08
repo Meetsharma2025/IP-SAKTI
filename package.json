@@ -11,9 +11,10 @@
     "db:seed": "echo \"POST /api/seed to seed the knowledge base\""
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@types/uuid": "^10.0.0",
     "dotenv": "17.3.1",
-    "drizzle-orm": "0.45.2",
+    "drizzle-orm": "^0.45.2",
     "lucide-react": "^1.41.0",
     "next": "16.2.6",
     "pg": "8.20.0",

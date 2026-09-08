@@ -1,5 +1,8 @@
 "use client";
 
+import { useLanguage } from "./LanguageContext";
+import dict from "@/lib/translations";
+
 import { useState } from "react";
 import { Globe, ArrowRight, CheckCircle, AlertTriangle, FileText, Shield, ExternalLink } from "lucide-react";
 
@@ -147,6 +150,8 @@ const markets: Record<string, MarketInfo> = {
 };
 
 export default function ExportWorkflow() {
+  const { language: lang } = useLanguage();
+  const t = (k: string) => dict[k]?.[lang] || dict[k]?.en || k;
   const [selectedMarket, setSelectedMarket] = useState<string | null>(null);
   const market = selectedMarket ? markets[selectedMarket] : null;
 
@@ -156,8 +161,8 @@ export default function ExportWorkflow() {
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
           <Globe className="w-8 h-8 text-white" />
         </div>
-        <h1 className="text-3xl font-bold text-earth-800">Export Market Pathways</h1>
-        <p className="text-earth-500 mt-2">Select a target market for Ayurvedic product export guidance</p>
+        <h1 className="text-3xl font-bold text-earth-800">{ t("exportTitle") }</h1>
+        <p className="text-earth-500 mt-2">{t("exportSubtitle")}</p>
       </div>
 
       {/* Market Selector */}

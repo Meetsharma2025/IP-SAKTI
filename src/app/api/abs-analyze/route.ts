@@ -7,7 +7,7 @@ export const maxDuration = 60;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { answers, preliminaryResult } = body;
+    const { answers, preliminaryResult, language = "en" } = body;
 
     if (!answers || !preliminaryResult) {
       return NextResponse.json(
@@ -18,7 +18,8 @@ export async function POST(request: NextRequest) {
 
     const result = await generateABSAnalysis(
       JSON.stringify(answers),
-      JSON.stringify(preliminaryResult)
+      JSON.stringify(preliminaryResult),
+      language
     );
 
     return NextResponse.json({

@@ -1,5 +1,8 @@
 "use client";
 
+import { useLanguage } from "./LanguageContext";
+import dict from "@/lib/translations";
+
 import { useState } from "react";
 import {
   Search, BookOpen, AlertTriangle, Loader2, Shield, CheckCircle,
@@ -15,6 +18,8 @@ interface TKDLResult {
 }
 
 export default function TKDLSearch() {
+  const { language: lang } = useLanguage();
+  const t = (k: string) => dict[k]?.[lang] || dict[k]?.en || k;
   const [formulation, setFormulation] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [therapeuticUse, setTherapeuticUse] = useState("");
@@ -33,7 +38,7 @@ export default function TKDLSearch() {
       const response = await fetch("/api/tkdl-search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ formulation, ingredients, therapeuticUse, query }),
+        body: JSON.stringify({ formulation, ingredients, therapeuticUse, query, language: lang }),
       });
 
       if (response.ok) {
@@ -60,7 +65,7 @@ export default function TKDLSearch() {
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-earth-600 to-earth-700 flex items-center justify-center mx-auto mb-4 shadow-lg">
           <BookOpen className="w-8 h-8 text-white" />
         </div>
-        <h1 className="text-3xl font-bold text-earth-800">TKDL / Prior-Art Check</h1>
+        <h1 className="text-3xl font-bold text-earth-800">{ t("tkdlTitle") }</h1>
         <p className="text-earth-500 mt-2 max-w-lg mx-auto">
           Check if your formulation may overlap with documented traditional knowledge before pursuing patent protection
         </p>

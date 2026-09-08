@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useLanguage } from "./LanguageContext";
 import {
   Search,
   BookOpen,
@@ -47,6 +48,18 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function KnowledgeBaseView() {
+  const { language: lang } = useLanguage();
+  const isHi = lang === "hi";
+  const t = (k: string) => {
+    const d: Record<string, Record<string, string>> = {
+      knowledgeBase: { en: "Knowledge Base", hi: "ज्ञान आधार", ta: "அறிவு தளம்", te: "జ్ఞాన భాండాగారం", bn: "জ্ঞান ভাণ্ডার", mr: "ज्ञान भांडार" },
+      knowledgeSubtitle: { en: "Browse curated statutes, rules, treaties, and guidance for Ayurvedic IP", hi: "आयुर्वेदिक IP के लिए कानून, नियम, संधियाँ और मार्गदर्शन ब्राउज़ करें", ta: "சட்டங்கள், விதிகள், ஒப்பந்தங்கள் உலாவுங்கள்", te: "చట్టాలు, నిబంధనలు, ఒప్పందాలు బ్రౌజ్ చేయండి", bn: "আইন, নিয়ম, চুক্তি ব্রাউজ করুন", mr: "कायदे, नियम, करार ब्राउज करा" },
+      searchKB: { en: "Search knowledge base...", hi: "ज्ञान आधार खोजें...", ta: "அறிவு தளத்தில் தேடுங்கள்...", te: "జ్ఞాన భాండాగారంలో వెతకండి...", bn: "জ্ঞান ভাণ্ডারে অনুসন্ধান...", mr: "ज्ञान भांडारात शोधा..." },
+      noDocsFound: { en: "No documents found. Try different filters.", hi: "कोई दस्तावेज़ नहीं मिला। अलग फ़िल्टर आज़माएं।", ta: "ஆவணங்கள் கிடைக்கவில்லை.", te: "డాక్యుమెంట్లు కనుగొనబడలేదు.", bn: "নথি পাওয়া যায়নি।", mr: "कागदपत्रे सापडली नाहीत." },
+      viewSource: { en: "View Source", hi: "स्रोत देखें", ta: "மூலத்தைக் காண்", te: "మూలం చూడండి", bn: "উৎস দেখুন", mr: "स्रोत पहा" },
+    };
+    return d[k]?.[lang] || d[k]?.en || k;
+  };
   const [documents, setDocuments] = useState<KnowledgeDoc[]>([]);
   const [search, setSearch] = useState("");
   const [jurisdiction, setJurisdiction] = useState("");
@@ -82,10 +95,10 @@ export default function KnowledgeBaseView() {
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-earth-800 flex items-center justify-center gap-2">
           <BookOpen className="w-8 h-8 text-saffron-600" />
-          Knowledge Base
+          {t("knowledgeBase")}
         </h1>
         <p className="text-earth-500 mt-2">
-          Browse curated statutes, rules, treaties, and guidance for Ayurvedic IP
+          {t("knowledgeSubtitle")}
         </p>
       </div>
 
@@ -98,7 +111,7 @@ export default function KnowledgeBaseView() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search knowledge base..."
+              placeholder={t("searchKB")}
               className="w-full pl-10 pr-4 py-2.5 border border-earth-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-saffron-400 text-sm"
             />
           </div>
@@ -141,7 +154,7 @@ export default function KnowledgeBaseView() {
       ) : documents.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-2xl border border-earth-200">
           <Filter className="w-12 h-12 text-earth-300 mx-auto mb-3" />
-          <p className="text-earth-500">No documents found. Try different filters.</p>
+          <p className="text-earth-500">{t('noDocsFound')}</p>
         </div>
       ) : (
         <div className="space-y-4">

@@ -34,5 +34,8 @@ next-env.d.ts
 # temp
 /tmp/
 
+# neon cli
+.neon/
+
 # drizzle
 drizzle/

@@ -23,6 +23,8 @@ import JurisdictionToggle from "./JurisdictionToggle";
 import ConfidenceIndicator from "./ConfidenceIndicator";
 import CitationCard from "./CitationCard";
 import VoiceInput, { SpeakButton } from "./VoiceInput";
+import { useLanguage } from "./LanguageContext";
+import dict from "@/lib/translations";
 
 interface Citation {
   citation: string;
@@ -88,7 +90,8 @@ export default function ChatInterface() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [jurisdiction, setJurisdiction] = useState("india");
-  const [language, setLanguage] = useState<Language>("en");
+  const { language, setLanguage } = useLanguage();
+  const t = (k: string) => dict[k]?.[language] || dict[k]?.en || k;
   const [expandedSection, setExpandedSection] = useState<Record<string, boolean>>({});
   const [sessionId] = useState(`chat_${Date.now()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -177,7 +180,7 @@ export default function ChatInterface() {
             </span>
           </h1>
           <p className="text-xs text-earth-500 mt-1">
-            Nemotron 3 Ultra • Multi-agent orchestration • Hybrid retrieval • Citation-grounded
+            {t('chatSubtitle')}
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
@@ -209,7 +212,7 @@ export default function ChatInterface() {
           {jurisdiction === "india" ? "🇮🇳" : "🌎"} {jurisdiction === "india" ? "Indian Law" : "International Regimes"}
         </div>
         <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-purple-50 text-purple-600 border border-purple-200">
-          <Layers className="w-3 h-3" /> Multi-Agent Pipeline
+          <Layers className="w-3 h-3" /> {t('multiAgentPipeline')}
         </div>
       </div>
 
@@ -285,7 +288,7 @@ export default function ChatInterface() {
                       {msg.contradictions && msg.contradictions.length > 0 && (
                         <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
                           <p className="text-xs font-medium text-red-700 flex items-center gap-1">
-                            <AlertCircle className="w-3 h-3" /> Contradictions Detected:
+                            <AlertCircle className="w-3 h-3" /> {t('contradictions')}
                           </p>
                           <ul className="mt-1 space-y-0.5">
                             {msg.contradictions.map((c, i) => (
@@ -299,7 +302,7 @@ export default function ChatInterface() {
                       {msg.uncertainties && msg.uncertainties.length > 0 && (
                         <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
                           <p className="text-xs font-medium text-amber-700 flex items-center gap-1">
-                            <AlertCircle className="w-3 h-3" /> Uncertainties Flagged:
+                            <AlertCircle className="w-3 h-3" /> {t('uncertainties')}
                           </p>
                           <ul className="mt-1 space-y-0.5">
                             {msg.uncertainties.map((u, i) => (
@@ -371,7 +374,7 @@ export default function ChatInterface() {
                             ⚠️ {msg.escalationReason || "Consider consulting an expert."}
                           </p>
                           <a href="/escalate" className="inline-flex items-center gap-1 mt-2 text-xs text-red-600 hover:text-red-800 font-medium">
-                            Request Expert Consultation <ArrowUpRight className="w-3 h-3" />
+                            {t('consultExpert')} <ArrowUpRight className="w-3 h-3" />
                           </a>
                         </div>
                       )}
@@ -393,7 +396,7 @@ export default function ChatInterface() {
                 <div className="bg-earth-50 rounded-2xl rounded-bl-sm px-4 py-3">
                   <div className="flex items-center gap-2 text-sm text-earth-500">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Multi-agent pipeline running...
+                    {t('searchingKB')}
                   </div>
                   <div className="mt-2 space-y-1 text-xs text-earth-400">
                     <div className="flex items-center gap-1"><Layers className="w-3 h-3" /> Query Analyzer → Hybrid Search → Specialized Agents → Evidence Merger</div>
@@ -417,7 +420,7 @@ export default function ChatInterface() {
         <input type="text" value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === "Enter" && sendMessage(input)}
-          placeholder="Ask about IP, regulations, ABS compliance... or use voice 🎤"
+          placeholder={t('chatPlaceholder')}
           className="flex-1 px-4 py-3 bg-white border border-earth-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-saffron-400 text-sm placeholder:text-earth-400"
           disabled={loading}
         />

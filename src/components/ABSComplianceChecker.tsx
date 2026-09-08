@@ -1,5 +1,8 @@
 "use client";
 
+import { useLanguage } from "./LanguageContext";
+import dict from "@/lib/translations";
+
 import { useState } from "react";
 import {
   Leaf,
@@ -308,6 +311,8 @@ function computeABSResult(answers: Record<string, string>): ABSResult {
 }
 
 export default function ABSComplianceChecker() {
+  const { language: lang } = useLanguage();
+  const t = (k: string) => dict[k]?.[lang] || dict[k]?.en || k;
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [result, setResult] = useState<ABSResult | null>(null);
@@ -326,7 +331,7 @@ export default function ABSComplianceChecker() {
       const response = await fetch("/api/abs-analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers: ans, preliminaryResult: res }),
+        body: JSON.stringify({ answers: ans, preliminaryResult: res, language: lang }),
       });
       if (response.ok) {
         const data = await response.json();
@@ -384,7 +389,7 @@ export default function ABSComplianceChecker() {
               <CheckCircle className="w-8 h-8 text-white" />
             )}
           </div>
-          <h1 className="text-3xl font-bold text-earth-800">ABS Compliance Assessment</h1>
+          <h1 className="text-3xl font-bold text-earth-800">{ t("absAssessment") }</h1>
           <div className={`inline-flex items-center gap-1.5 mt-3 px-4 py-1.5 rounded-full text-sm font-medium text-white bg-gradient-to-r ${getLevelColor(result.level)}`}>
             {result.required ? "Compliance Required" : "Likely Exempt"} — {result.level.charAt(0).toUpperCase() + result.level.slice(1)} Priority
           </div>
@@ -550,9 +555,9 @@ export default function ABSComplianceChecker() {
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-ayurveda-500 to-ayurveda-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
           <Leaf className="w-8 h-8 text-white" />
         </div>
-        <h1 className="text-3xl font-bold text-earth-800">ABS Compliance Checker</h1>
+        <h1 className="text-3xl font-bold text-earth-800">{ t("absChecker") }</h1>
         <p className="text-earth-500 mt-2">
-          Determine your Access & Benefit Sharing obligations
+          {t("absSubtitle")}
         </p>
       </div>
 

@@ -1,5 +1,8 @@
 "use client";
 
+import { useLanguage } from "./LanguageContext";
+import dict from "@/lib/translations";
+
 import { useState, useEffect, useCallback } from "react";
 import {
   Building2, Plus, Users, Package, Shield, FileText, AlertTriangle,
@@ -40,6 +43,8 @@ const orgTypes = [
 ];
 
 export default function WorkspaceHub() {
+  const { language: lang } = useLanguage();
+  const t = (k: string) => dict[k]?.[lang] || dict[k]?.en || k;
   const [view, setView] = useState<View>("setup");
   const [org, setOrg] = useState<Organization | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -162,7 +167,7 @@ export default function WorkspaceHub() {
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-saffron-500 to-ayurveda-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Building2 className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-earth-800">Create Your Workspace</h1>
+          <h1 className="text-3xl font-bold text-earth-800">{ t("createWorkspace") }</h1>
           <p className="text-earth-500 mt-2">Set up your organization for personalized IP & regulatory guidance</p>
         </div>
 

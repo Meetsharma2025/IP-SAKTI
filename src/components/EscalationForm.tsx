@@ -1,9 +1,14 @@
 "use client";
 
+import { useLanguage } from "./LanguageContext";
+import dict from "@/lib/translations";
+
 import { useState } from "react";
 import { Users, Send, CheckCircle, Loader2, AlertTriangle } from "lucide-react";
 
 export default function EscalationForm() {
+  const { language: lang } = useLanguage();
+  const t = (k: string) => dict[k]?.[lang] || dict[k]?.en || k;
   const [form, setForm] = useState({
     reason: "",
     userQuery: "",
@@ -77,9 +82,9 @@ export default function EscalationForm() {
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-saffron-500 to-saffron-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
           <Users className="w-8 h-8 text-white" />
         </div>
-        <h1 className="text-3xl font-bold text-earth-800">Request Expert Consultation</h1>
+        <h1 className="text-3xl font-bold text-earth-800">{ t("expertTitle") }</h1>
         <p className="text-earth-500 mt-2">
-          Connect with a qualified IP facilitator for personalized guidance
+          {t("expertSubtitle")}
         </p>
       </div>
 

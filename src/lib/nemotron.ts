@@ -6,9 +6,6 @@ const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const MODEL_NVIDIA = "nvidia/nemotron-3-ultra-550b-a55b";
 const MODEL_OPENROUTER = "nvidia/nemotron-3-ultra-550b-a55b:free";
-// Keep each upstream attempt within the Vercel function budget. Callers can
-// still return their source-backed fallback if both providers are unavailable.
-const PROVIDER_TIMEOUT_MS = 20_000;
 
 interface NemotronMessage {
   role: "system" | "user" | "assistant";
@@ -93,7 +90,6 @@ export async function callNemotron(
       method: "POST",
       headers,
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -165,7 +161,6 @@ export async function callNemotron(
         method: "POST",
         headers: fbHeaders,
         body: JSON.stringify(fbBody),
-        signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
       });
 
       if (!fbResponse.ok) throw new Error(`Fallback ${fbProvider} also failed`);
@@ -220,10 +215,20 @@ export async function generateClassificationAnalysis(
   productName: string,
   productDescription: string,
   classificationResult: string,
-  answers: string
+  answers: string,
+  language: string = "en"
 ): Promise<NemotronResponse> {
+  const langMap: Record<string, string> = {
+    hi: "\n\n🔴 अनिवार्य: पूरा विश्लेषण हिन्दी में लिखें। केवल कानूनी धारा संख्या अंग्रेजी में रखें।",
+    ta: "\n\n🔴 கட்டாயம்: முழு பகுப்பாய்வையும் தமிழில் எழுதவும்.",
+    te: "\n\n🔴 తప్పనిసరి: పూర్తి విశ్లేషణ తెలుగులో రాయండి.",
+    bn: "\n\n🔴 বাধ্যতামূলক: সম্পূর্ণ বিশ্লেষণ বাংলায় লিখুন।",
+    mr: "\n\n🔴 अनिवार्य: संपूर्ण विश्लेषण मराठीत लिहा.",
+  };
+  const langInstr = langMap[language] || "";
+
   return callNemotron([
-    { role: "system", content: SYSTEM_PROMPT },
+    { role: "system", content: SYSTEM_PROMPT + langInstr },
     {
       role: "user",
       content: `Analyze this Ayurvedic product classification:
@@ -232,13 +237,14 @@ DESCRIPTION: ${productDescription}
 ANSWERS: ${answers}
 PRELIMINARY CLASSIFICATION: ${classificationResult}
 
-Provide: 1) Confirm/refine classification 2) IP protection strategy 3) Regulatory steps 4) ABS requirements 5) TKDL check recommendations. Cite specific statutes.`,
+Provide: 1) Confirm/refine classification 2) IP protection strategy 3) Regulatory steps 4) ABS requirements 5) TKDL check recommendations. Cite specific statutes.${langInstr}`,
     },
   ], { temperature: 0.2, maxTokens: 2500, reasoning: true });
 }
 
 export async function translateText(
   text: string,
+  sourceLanguage: string,
   targetLanguage: string
 ): Promise<NemotronResponse> {
   const langMap: Record<string, string> = {
@@ -248,7 +254,7 @@ export async function translateText(
   return callNemotron([
     {
       role: "system",
-      content: `Translate into ${langMap[targetLanguage] || targetLanguage}. Keep statute references in English. Maintain formatting.`,
+      content: `Translate from ${langMap[sourceLanguage] || sourceLanguage} into ${langMap[targetLanguage] || targetLanguage}. Keep statute references in English. Maintain formatting and meaning. Return only the translated text.`,
     },
     { role: "user", content: text },
   ], { temperature: 0.1, maxTokens: 3000 });
@@ -256,17 +262,27 @@ export async function translateText(
 
 export async function generateABSAnalysis(
   answers: string,
-  preliminaryResult: string
+  preliminaryResult: string,
+  language: string = "en"
 ): Promise<NemotronResponse> {
+  const langMap: Record<string, string> = {
+    hi: "\n\n🔴 अनिवार्य: पूरा विश्लेषण हिन्दी में लिखें। केवल कानूनी धारा संख्या अंग्रेजी में रखें।",
+    ta: "\n\n🔴 கட்டாயம்: முழு பகுப்பாய்வையும் தமிழில் எழுதவும்.",
+    te: "\n\n🔴 తప్పనిసరి: పూర్తి విశ్లేషణ తెలుగులో రాయండి.",
+    bn: "\n\n🔴 বাধ্যতামূলক: সম্পূর্ণ বিশ্লেষণ বাংলায় লিখুন।",
+    mr: "\n\n🔴 अनिवार्य: संपूर्ण विश्लेषण मराठीत लिहा.",
+  };
+  const langInstr = langMap[language] || "";
+
   return callNemotron([
-    { role: "system", content: SYSTEM_PROMPT },
+    { role: "system", content: SYSTEM_PROMPT + langInstr },
     {
       role: "user",
       content: `Analyze ABS compliance for Ayurvedic product:
 RESPONSES: ${answers}
 ASSESSMENT: ${preliminaryResult}
 
-Provide: 1) Confirm/refine assessment 2) Specific BD Act sections 3) Compliance steps with forms 4) International obligations 5) 2023 Amendment changes 6) Non-compliance consequences. Cite specific sections.`,
+Provide: 1) Confirm/refine assessment 2) Specific BD Act sections 3) Compliance steps with forms 4) International obligations 5) 2023 Amendment changes 6) Non-compliance consequences. Cite specific sections.${langInstr}`,
     },
   ], { temperature: 0.2, maxTokens: 2500, reasoning: true });
 }

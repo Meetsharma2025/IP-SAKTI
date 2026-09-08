@@ -18,8 +18,13 @@ import {
 } from "lucide-react";
 import { classificationQuestions } from "@/lib/classification";
 import type { ClassificationResult } from "@/lib/classification";
+import { useLanguage } from "./LanguageContext";
+import dict from "@/lib/translations";
 
 export default function ClassificationWizard() {
+  const { language: lang } = useLanguage();
+  const isHi = lang === "hi";
+  const t = (k: string) => dict[k]?.[lang] || dict[k]?.en || k;
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [result, setResult] = useState<ClassificationResult | null>(null);
@@ -59,6 +64,7 @@ export default function ClassificationWizard() {
           answers,
           productName,
           productDescription,
+          language: lang,
         }),
       });
       const data = await response.json();
@@ -100,7 +106,7 @@ export default function ClassificationWizard() {
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-ayurveda-500 to-ayurveda-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
             <CheckCircle className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-earth-800">Classification Complete</h1>
+          <h1 className="text-3xl font-bold text-earth-800">{t("classificationComplete")}</h1>
           <p className="text-earth-500 mt-2">
             Product: <strong>{productName}</strong>
           </p>
@@ -235,7 +241,7 @@ export default function ClassificationWizard() {
 
         {/* Key Statutes */}
         <div className="bg-white rounded-2xl border border-earth-200 p-6 mb-6">
-          <h3 className="text-lg font-bold text-earth-800 mb-3">Key Applicable Statutes</h3>
+          <h3 className="text-lg font-bold text-earth-800 mb-3">{ t("keyStatutes") }</h3>
           <div className="flex flex-wrap gap-2">
             {result.keyStatutes.map((statute, i) => (
               <span
@@ -345,7 +351,7 @@ export default function ClassificationWizard() {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-earth-800">Product Classification</h1>
+        <h1 className="text-3xl font-bold text-earth-800">{t("productClassification")}</h1>
         <p className="text-earth-500 mt-2">
           Determine your product category, IP options, and regulatory requirements
         </p>
@@ -374,12 +380,12 @@ export default function ClassificationWizard() {
         {isProductInfoStep ? (
           <div className="animate-fade-in">
             <h2 className="text-lg font-bold text-earth-800 mb-4">
-              Tell us about your product
+              {t("tellUsProduct")}
             </h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-earth-700 mb-1">
-                  Product Name *
+                  { t('productName') } *
                 </label>
                 <input
                   type="text"
@@ -406,7 +412,7 @@ export default function ClassificationWizard() {
         ) : currentQuestion ? (
           <div className="animate-fade-in">
             <h2 className="text-lg font-bold text-earth-800 mb-1">
-              {currentQuestion.question}
+              {(isHi && currentQuestion.questionHi) ? currentQuestion.questionHi : currentQuestion.question}
             </h2>
             {currentQuestion.helpText && (
               <p className="text-xs text-earth-500 mb-4 flex items-start gap-1">
@@ -437,7 +443,7 @@ export default function ClassificationWizard() {
                         <div className="w-2 h-2 rounded-full bg-white" />
                       )}
                     </div>
-                    <span className="text-sm font-medium">{opt.label}</span>
+                    <span className="text-sm font-medium">{(isHi && opt.labelHi) ? opt.labelHi : opt.label}</span>
                   </div>
                 </button>
               ))}

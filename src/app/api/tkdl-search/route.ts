@@ -10,7 +10,7 @@ export const maxDuration = 90;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { formulation, ingredients, therapeuticUse } = body;
+    const { formulation, ingredients, therapeuticUse, language = "en" } = body;
 
     if (!formulation && !ingredients) {
       return NextResponse.json({ error: "Formulation or ingredients required" }, { status: 400 });
@@ -51,7 +51,8 @@ RULES:
 - "unknown" = insufficient information to assess
 - Never claim to have searched the actual TKDL database (restricted access)
 - Cite specific classical texts (Charaka Samhita, Sushruta Samhita, etc.) where relevant
-- Be honest about limitations of this analysis`
+- Be honest about limitations of this analysis
+${language !== "en" ? `- IMPORTANT: Write the "analysis" and "recommendations" text in ${language === "hi" ? "Hindi (हिन्दी)" : language === "ta" ? "Tamil (தமிழ்)" : language === "te" ? "Telugu (తెలుగు)" : language === "bn" ? "Bengali (বাংলা)" : language === "mr" ? "Marathi (मराठी)" : "English"}. Keep JSON keys and legal references in English.` : ""}`
         },
         {
           role: "user",

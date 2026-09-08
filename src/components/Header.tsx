@@ -15,14 +15,15 @@ export default function Header({ language, onLanguageChange }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
 
+  const isHi = language === "hi";
   const navItems = [
-    { href: "/", label: "Home" },
-    { href: "/workspace", label: "Workspace" },
-    { href: "/chat", label: "IP Assistant" },
-    { href: "/classify", label: "Classify" },
+    { href: "/", label: isHi ? "होम" : "Home" },
+    { href: "/workspace", label: isHi ? "वर्कस्पेस" : "Workspace" },
+    { href: "/chat", label: isHi ? "IP सहायक" : "IP Assistant" },
+    { href: "/classify", label: isHi ? "वर्गीकरण" : "Classify" },
     { href: "/tkdl", label: "TKDL" },
-    { href: "/export", label: "Export" },
-    { href: "/knowledge", label: "Knowledge" },
+    { href: "/export", label: isHi ? "निर्यात" : "Export" },
+    { href: "/knowledge", label: isHi ? "ज्ञान" : "Knowledge" },
     { href: "/abs", label: "ABS" },
   ];
 

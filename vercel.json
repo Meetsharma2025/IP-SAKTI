@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "src/app/api/chat/route.ts": { "maxDuration": 60 },
+    "src/app/api/client/chat/route.ts": { "maxDuration": 60 },
+    "src/app/api/verify-sources/route.ts": { "maxDuration": 60 },
+    "src/app/api/tkdl-search/route.ts": { "maxDuration": 60 },
+    "src/app/api/classify/route.ts": { "maxDuration": 60 },
+    "src/app/api/abs-analyze/route.ts": { "maxDuration": 60 },
+    "src/app/api/translate/route.ts": { "maxDuration": 45 },
+    "src/app/api/seed/route.ts": { "maxDuration": 60 },
+    "src/app/api/client/org/route.ts": { "maxDuration": 30 },
+    "src/app/api/client/products/route.ts": { "maxDuration": 30 },
+    "src/app/api/client/ip-assets/route.ts": { "maxDuration": 30 },
+    "src/app/api/client/documents/route.ts": { "maxDuration": 30 }
+  }
+}
